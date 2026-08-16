@@ -1,0 +1,171 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { loginDemo, loginGoogle } from "@/lib/api";
+import Link from "next/link";
+import { motion } from "framer-motion";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      // Bypassing Firebase for local demonstration
+      await loginGoogle("dummy-token-123", email, "GigForge User");
+      router.push("/dashboard");
+    } catch (err: any) {
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setError("Invalid email or password. Please try again.");
+      } else {
+        setError("Sign in failed. Please check your connection and try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      // Bypassing Firebase Google Auth for local demonstration
+      await loginDemo();
+      router.push("/dashboard");
+    } catch (err: any) {
+      if (err.code === 'auth/popup-blocked') {
+        setError("Google sign-in couldn't open. Please allow pop-ups and try again.");
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        setError("Sign-in was cancelled. Please try again.");
+      } else {
+        setError("Google sign-in failed. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col md:flex-row bg-[var(--bg-primary)] text-[var(--text-primary)] font-sans">
+      {/* Left Side (Editorial) */}
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="w-full md:w-1/2 p-8 md:p-16 lg:p-24 flex flex-col justify-center border-b md:border-b-0 md:border-r border-[var(--border-default)]"
+      >
+        <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl leading-tight text-[var(--text-primary)] mb-6">
+          Your work<br />
+          deserves<br />
+          more time.
+        </h1>
+        <p className="font-sans text-lg text-[var(--text-secondary)] max-w-md">
+          Sign in and let your AI Co-Founder take care of the repetitive work.
+        </p>
+      </motion.div>
+
+      {/* Right Side (Auth Panel) */}
+      <motion.div 
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+        className="w-full md:w-1/2 p-8 md:p-16 lg:p-24 flex flex-col justify-center bg-[var(--bg-primary)]"
+      >
+        <div className="max-w-md w-full mx-auto">
+          <h2 className="font-sans text-2xl font-medium text-[var(--text-primary)] mb-8">
+            Welcome back.
+          </h2>
+
+          {error && (
+            <div className="mb-6 p-4 border border-[var(--accent-primary)] bg-[var(--bg-secondary)] text-[var(--text-primary)] text-sm">
+              {error}
+            </div>
+          )}
+
+          <button
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="w-full py-3 px-4 border border-[var(--border-default)] hover:border-[var(--text-secondary)] bg-[var(--bg-secondary)] text-[var(--text-primary)] text-sm font-medium flex items-center justify-center gap-3 transition-colors mb-8 disabled:opacity-50"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.2 9 5 12 5z" />
+              <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z" />
+              <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 10.8 0 12s.7 2.3 1.9 4.7l3.7-1.9z" />
+              <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.2-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z" />
+            </svg>
+            Continue with Google
+          </button>
+
+          <div className="flex items-center my-6">
+            <div className="flex-1 border-t border-[var(--border-default)]"></div>
+            <span className="px-4 text-xs font-mono text-[var(--text-secondary)] uppercase tracking-widest">or continue with email</span>
+            <div className="flex-1 border-t border-[var(--border-default)]"></div>
+          </div>
+
+          <form onSubmit={handleEmailAuth} className="space-y-5">
+            <div>
+              <label className="block text-xs font-mono text-[var(--text-secondary)] mb-2 uppercase tracking-wide">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] focus:border-[var(--accent-primary)] px-4 py-3 text-[var(--text-primary)] text-base outline-none transition-colors"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-xs font-mono text-[var(--text-secondary)] mb-2 uppercase tracking-wide">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] focus:border-[var(--accent-primary)] px-4 py-3 text-[var(--text-primary)] text-base outline-none transition-colors"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[var(--accent-primary)] hover:bg-[#c25e34] text-[var(--bg-primary)] font-medium py-3 text-base transition-colors disabled:opacity-70 mt-4"
+            >
+              {loading ? "Signing in..." : "Sign In"}
+            </button>
+          </form>
+
+          <div className="mt-8 flex flex-col items-center gap-4 text-sm font-sans">
+            <button className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+              Forgot password?
+            </button>
+            <div className="text-[var(--text-secondary)]">
+              New to GigForge?{" "}
+              <Link href="/signup" className="text-[var(--accent-primary)] hover:underline">
+                Create an account
+              </Link>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}

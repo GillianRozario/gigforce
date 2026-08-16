@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: #151513;
+  --color-bg-secondary: #1D1C19;
+  --color-bg-tertiary: #11110F;
+  --color-text-primary: #F2EFE7;
+  --color-text-secondary: #A9A49A;
+  --color-accent-primary: #D86B3D;
+  --color-accent-secondary: #8D9A73;
+  --color-accent-tertiary: #D7B96E;
+  --color-border-default: #34322D;
+
+  --font-serif: var(--font-playfair), serif;
+  --font-sans: var(--font-inter), sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+}
+
+:root {
+  --bg-primary: #151513;
+  --bg-secondary: #1D1C19;
+  --bg-tertiary: #11110F;
+  --text-primary: #F2EFE7;
+  --text-secondary: #A9A49A;
+  --accent-primary: #D86B3D;
+  --accent-secondary: #8D9A73;
+  --accent-tertiary: #D7B96E;
+  --border-default: #34322D;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-inter), sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle grain texture overlay */
+.bg-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Base interactive elements reset */
+button, a {
+  transition: all 0.2s ease-out;
+}
